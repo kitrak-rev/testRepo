@@ -1,9 +1,19 @@
-WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            wait.until((ExpectedCondition<Boolean>) wd ->
-                ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+# Source and destination directories
+source_dir="/path/to/source/"
+destination_dir="/path/to/destination/"
 
-            // Now wait for the updated element to be present
-            WebElement updatedElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("updatedElement")));
+# Array of files to copy
+files=("file1.txt" "file2.txt" "file3.txt")
 
-            // Interact with the updated element
-            System.out.println("Updated Element Tag Name: " + updatedElement.getTagName());
+# Loop through each file
+for file in "${files[@]}"
+do
+    # Check if the file exists in the destination
+    if [ ! -f "${destination_dir}/${file}" ]; then
+        echo "Copying ${file}..."
+        cp "${source_dir}/${file}" "${destination_dir}"
+        echo "${file} copied successfully."
+    else
+        echo "${file} already exists in the destination. Skipping copy."
+    fi
+done
