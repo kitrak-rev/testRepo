@@ -1,19 +1,16 @@
-# Source and destination directories
-source_dir="/path/to/source/"
-destination_dir="/path/to/destination/"
-
-# Array of files to copy
-files=("file1.txt" "file2.txt" "file3.txt")
-
-# Loop through each file
-for file in "${files[@]}"
-do
-    # Check if the file exists in the destination
-    if [ ! -f "${destination_dir}/${file}" ]; then
-        echo "Copying ${file}..."
-        cp "${source_dir}/${file}" "${destination_dir}"
-        echo "${file} copied successfully."
-    else
-        echo "${file} already exists in the destination. Skipping copy."
-    fi
-done
+ChromeOptions options = new ChromeOptions();
+HashMap<String, Object> prefs = new HashMap<>();
+prefs.put("profile.default_content_settings.popups", 0);
+prefs.put("download.default_directory", LocationUtil.getDownloadFolderPath());
+prefs.put("download.prompt_for_download", false);
+prefs.put("safebrowsing.enabled", true);
+options.setExperimentalOption("prefs", prefs);
+ChromeDriver chromeDriver= new ChromeDriver(options);
+ChromeOptions options = new ChromeOptions();
+options.setExperimentalOption("prefs", prefs);
+options.addArguments("start-maximized");
+options.addArguments("--safebrowsing-disable-download-protection");
+options.addArguments("safebrowsing-disable-extension-blacklist");
+WebDriver driver =  new ChromeDriver(options); 
+driver.get("http://www.landxmlproject.org/file-cabinet");
+new WebDriverWait(driver, 20).until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='MntnRoad.xml']//following::span[1]//a[text()='Download']"))).click();
