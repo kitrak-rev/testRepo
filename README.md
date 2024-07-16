@@ -37,3 +37,10 @@ def call() {
 }
 ```
 
+
+```
+def gitCreds = "${GIT_USERNAME}:${GIT_PASSWORD}"
+                        git credentialsId: 'git-credentials-id', url: "${env.GIT_REPO}", branch: "${env.GIT_BRANCH}", credentials: gitCreds
+
+```
+
