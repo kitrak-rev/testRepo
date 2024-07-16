@@ -1,6 +1,36 @@
-    public static void waitForPageRefresh(WebDriver driver) {
-        // Use JavaScript to wait for document.readyState to be complete after the refresh
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until((ExpectedCondition<Boolean>) wd ->
-            ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+`def call() {
+    parallel {
+        stage('Parallel Step 1') {
+            steps {
+                echo 'Executing Parallel Step 1...'
+                // Add your commands for step 1 here
+                sh './script1.sh'
+            }
+        }
+        stage('Parallel Step 2') {
+            steps {
+                echo 'Executing Parallel Step 2...'
+                // Add your commands for step 2 here
+                sh './script2.sh'
+            }
+        }
     }
+}
+`
+
+
+` pipeline {
+    agent any
+
+    stages {
+        stage('Parallel Execution') {
+            steps {
+                script {
+                    def parallelStages = load 'vars/parallelStages.groovy'
+                    parallelStages()
+                }
+            }
+        }
+    }
+} `
+
