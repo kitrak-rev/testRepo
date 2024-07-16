@@ -1,4 +1,4 @@
-`def call() {
+```def call() {
     parallel {
         stage('Parallel Step 1') {
             steps {
@@ -16,10 +16,10 @@
         }
     }
 }
-`
+```
 
 
-` pipeline {
+``` pipeline {
     agent any
 
     stages {
@@ -32,5 +32,5 @@
             }
         }
     }
-} `
+} ```
 
