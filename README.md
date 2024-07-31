@@ -1,46 +1,12 @@
-```
-def call() {
-    parallel {
-        stage('Parallel Step 1') {
-            steps {
-                echo 'Executing Parallel Step 1...'
-                // Add your commands for step 1 here
-                sh './script1.sh'
-            }
-        }
-        stage('Parallel Step 2') {
-            steps {
-                echo 'Executing Parallel Step 2...'
-                // Add your commands for step 2 here
-                sh './script2.sh'
-            }
-        }
-    }
-}
-```
-
-
-```
- pipeline {
-    agent any
-
-    stages {
-        stage('Parallel Execution') {
-            steps {
-                script {
-                    def parallelStages = load 'vars/parallelStages.groovy'
-                    parallelStages()
-                }
-            }
-        }
-    }
-}
-```
-
-
-```
-def gitCreds = "${GIT_USERNAME}:${GIT_PASSWORD}"
-                        git credentialsId: 'git-credentials-id', url: "${env.GIT_REPO}", branch: "${env.GIT_BRANCH}", credentials: gitCreds
-
-```
-
+def is_file_empty_or_whitespace(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            content = file.read()
+            # Check if the content is empty or contains only whitespace characters
+            return not content or content.isspace()
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return False
+    except IOError as e:
+        print(f"IO error occurred: {e}")
+        return False
