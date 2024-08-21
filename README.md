@@ -76,3 +76,71 @@ public class StartupCheckLibrary {
     }
 }
 ```
+
+
+
+'''
+package com.example.startupcheck;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+public class JsonPostRequest {
+
+    public static void main(String[] args) {
+        try {
+            String urlString = "https://your-url-to-post.com/api";
+            String jsonPayload = "{\"key1\":\"value1\", \"key2\":\"value2\"}";
+
+            sendPostRequest(urlString, jsonPayload);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sends a POST request with a JSON payload.
+     *
+     * @param urlString   The URL to which the request is sent.
+     * @param jsonPayload The JSON payload to send.
+     * @throws Exception If an error occurs during the request.
+     */
+    public static void sendPostRequest(String urlString, String jsonPayload) throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        // Set request method to POST
+        connection.setRequestMethod("POST");
+
+        // Set headers for the request
+        connection.setRequestProperty("Content-Type", "application/json; utf-8");
+        connection.setRequestProperty("Accept", "application/json");
+
+        // Enable writing to the connection output stream
+        connection.setDoOutput(true);
+
+        // Write the JSON payload to the output stream
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        // Get the response code
+        int responseCode = connection.getResponseCode();
+        System.out.println("POST Response Code: " + responseCode);
+
+        // Handle the response (optional)
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("POST request succeeded.");
+            // Read response from the input stream (not shown here)
+        } else {
+            System.out.println("POST request failed.");
+        }
+
+        // Close the connection
+        connection.disconnect();
+    }
+}
+'''
