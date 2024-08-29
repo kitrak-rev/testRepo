@@ -1,5 +1,3 @@
-pip install flask flask-swagger-ui
-
 from flask import Flask, send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 
@@ -7,7 +5,7 @@ app = Flask(__name__)
 
 # Configure Swagger UI
 SWAGGER_URL = '/swagger'
-API_URL = '/static/openapi.yaml'
+API_URL = '/static/openapi.json'
 swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
