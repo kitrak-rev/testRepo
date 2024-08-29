@@ -1,10 +1,25 @@
-with open('config.yaml', 'r') as file:
-    data = yaml.safe_load(file)
+pip install flask flask-swagger-ui
 
-# Step 2: Update the list
-new_server = {'name': 'server3', 'ip': '192.168.1.3'}
-data['servers'].append(new_server)
+from flask import Flask, send_from_directory
+from flask_swagger_ui import get_swaggerui_blueprint
 
-# Step 3: Write the updated data back to the YAML file
-with open('config.yaml', 'w') as file:
-    yaml.dump(data, file, default_flow_style=False)
+app = Flask(__name__)
+
+# Configure Swagger UI
+SWAGGER_URL = '/swagger'
+API_URL = '/static/openapi.yaml'
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Sample API"
+    }
+)
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
+
+if __name__ == '__main__':
+    app.run(debug=True)
