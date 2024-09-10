@@ -1,120 +1,60 @@
-<!-- src/main/resources/static/index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Data</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        form {
-            max-width: 600px;
-            margin: auto;
-        }
-        label, input, textarea {
-            display: block;
-            margin-bottom: 10px;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-        }
-        button {
-            padding: 10px 20px;
-        }
-        #response {
-            margin-top: 20px;
-            font-size: 1.2em;
-        }
-    </style>
-</head>
-<body>
-    <h1>Submit Data</h1>
-    <form id="dataForm">
-        <label for="domain">Domain:</label>
-        <input type="text" id="domain" name="domain" required>
-        
-        <label for="subdomain">Subdomain:</label>
-        <input type="text" id="subdomain" name="subdomain" required>
-        
-        <label for="language">Language:</label>
-        <input type="text" id="language" name="language" required>
-        
-        <label for="version">Version:</label>
-        <input type="text" id="version" name="version" required>
-        
-        <label for="attributes">Attributes (JSON format):</label>
-        <textarea id="attributes" name="attributes"></textarea>
+import pandas as pd
+import requests
+from requests.auth import HTTPBasicAuth
+from dotenv import load_dotenv
+import os
 
-        <!-- Choose one of the following sections -->
+# Load environment variables from .env file
+load_dotenv()
 
-        <!-- Text Area for Value -->
-        <label for="value">Value:</label>
-        <textarea id="value" name="value"></textarea>
+# Get the Bitbucket token and other necessary details from environment variables
+BITBUCKET_TOKEN = os.getenv('BITBUCKET_TOKEN')
+BITBUCKET_USER = os.getenv('BITBUCKET_USER')  # Optional if using token-based auth
+BITBUCKET_WORKSPACE = os.getenv('BITBUCKET_WORKSPACE')
 
-        <!-- OR File Input for Value -->
-        <!--
-        <label for="file">Upload File:</label>
-        <input type="file" id="file" name="file">
-        -->
+# Define the Excel file path
+EXCEL_FILE_PATH = 'path/to/your/excel/workbook.xlsx'
 
-        <button type="submit">Submit Data</button>
-    </form>
-    <div id="response"></div>
+# Define the Bitbucket API URL base
+BITBUCKET_API_BASE_URL = 'https://api.bitbucket.org/2.0'
 
-    <script>
-        document.getElementById('dataForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+def create_tag(repo_name, commit_id, tag_name):
+    url = f"{BITBUCKET_API_BASE_URL}/repositories/{BITBUCKET_WORKSPACE}/{repo_name}/refs/tags/{tag_name}"
+    response = requests.post(url, auth=HTTPBasicAuth(BITBUCKET_USER, BITBUCKET_TOKEN), json={'name': tag_name, 'target': commit_id})
+    if response.status_code == 201:
+        return response.json()['links']['html']['href']
+    else:
+        raise Exception(f"Failed to create tag: {response.text}")
 
-            const formData = {
-                domain: document.getElementById('domain').value,
-                subdomain: document.getElementById('subdomain').value,
-                language: document.getElementById('language').value,
-                version: document.getElementById('version').value,
-                attributes: JSON.parse(document.getElementById('attributes').value || '{}')
-            };
+def main():
+    # Load the Excel file
+    with pd.ExcelFile(EXCEL_FILE_PATH) as xls:
+        # Read the first sheet into a DataFrame
+        df = pd.read_excel(xls, sheet_name=0)
 
-            const valueText = document.getElementById('value').value;
-            formData.value = valueText; // Use this if you're using the text area for value
+        # Create a new column for tag links
+        df['tagLink'] = ''
 
-            // For file upload
-            /*
-            const fileInput = document.getElementById('file');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    formData.value = event.target.result;
-                    sendData(formData);
-                };
-                reader.readAsText(file);
-            } else {
-                sendData(formData);
-            }
-            */
+        # Process each row to create tags and update the DataFrame
+        for index, row in df.iterrows():
+            repo_name = row['repoName']
+            commit_id = row['commitID']
+            tag_name = row['tagName']
+            
+            try:
+                tag_link = create_tag(repo_name, commit_id, tag_name)
+                df.at[index, 'tagLink'] = tag_link
+                print(f"Tag created: {tag_name} at {tag_link}")
+            except Exception as e:
+                print(f"Error creating tag {tag_name} for repo {repo_name}: {e}")
 
-            function sendData(data) {
-                fetch('/api/submitData', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('response').innerText = data;
-                })
-                .catch(error => {
-                    console.error('Error submitting data:', error);
-                });
-            }
+        # Save the updated DataFrame back to the same Excel file, specifically to sheet0
+        with pd.ExcelWriter(EXCEL_FILE_PATH, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+            df.to_excel(writer, sheet_name='Sheet0', index=False)
 
-            sendData(formData);
-        });
-    </script>
-</body>
-</html>
+if __name__ == '__main__':
+    main()
+
+BITBUCKET_TOKEN=your_bitbucket_token_here
+BITBUCKET_USER=your_bitbucket_username_here
+BITBUCKET_WORKSPACE=your_bitbucket_workspace_here
