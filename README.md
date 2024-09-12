@@ -1,29 +1,4 @@
-import pandas as pd
 
-# Create a DataFrame
-data = {
-    'Name': ['Google', 'OpenAI'],
-    'Description': ['Search Engine', 'AI Research'],
-    'Other': ['Data1', 'Data2'],
-    'URL': ['https://www.google.com', 'https://www.openai.com']
-}
-df = pd.DataFrame(data)
+Encountered same issue. tibjms has jakarta compatible library that comes with Tibco EMS 10.2. Unfortunately, this library is not published in public maven repo. To be able to use this, download the latest Tibco EMS community edition, install in the system and you will be able to see the lib under tibco/ems/10.2/lib folder with name jakarta.jms-tibjms.jar Upload it to your private nexus repo and thats it. You need corresponding jakarta.jms-api dependency. This library is available in public maven repo.
 
-# Define the path to save the Excel file
-file_path = 'example_with_hyperlinks.xlsx'
-
-# Create a Pandas Excel writer using XlsxWriter as the engine
-with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
-    # Write the DataFrame to the Excel file
-    df.to_excel(writer, index=False, sheet_name='Sheet1')
-
-    # Access the XlsxWriter workbook and worksheet objects
-    workbook  = writer.book
-    worksheet = writer.sheets['Sheet1']
-
-    # Loop through the DataFrame and add hyperlinks to the 4th column (index 3)
-    for row_num, url in enumerate(df['URL'], start=1):  # start=1 to account for header row
-        cell_location = f'D{row_num + 1}'  # Column 'D' is the 4th column, rows start from 2
-        worksheet.write_url(cell_location, url, string=url)
-
-print(f"Excel file with hyperlinks saved to {file_path}")
+https://stackoverflow.com/questions/75226702/tibcojmsconnectionfactory-configuration-issues
